@@ -3,8 +3,17 @@
 	"GoVersion": "go1.4.1",
 	"Deps": [
 		{
+			"ImportPath": "github.com/BurntSushi/toml",
+			"Comment": "v0.1.0-18-g443a628",
+			"Rev": "443a628bc233f634a75bcbdd71fe5350789f1afa"
+		},
+		{
 			"ImportPath": "github.com/masahide/go-libGeoIP",
 			"Rev": "8ee2ba810972d7ca3a087a2e1709f6d3fe557ffb"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "49c95bdc21843256fb6c4e0d370a05f24a0bf213"
 		}
 	]
 }
