@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<!-- Bootstrap core CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+		<!-- Custom styles for this template -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+		<title>IP address information</title>
+		<style type="text/css">
+			#footer {
+				height: 60px;
+				background-color: #f5f5f5;
+				margin-left: -20px;
+				margin-right: -20px;
+				padding-left: 20px;
+				padding-right: 20px;
+				text-align: right;
+			}
+			.container .credit {
+				margin: 20px 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="page-header">
+				<h1>IP address information</h1>
+				<p class="lead"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Your IP Address is <strong>{{ .IP }}</strong>.</p>
+			</div>
+
+			<div class="table-responsive">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th style="width: 20%">Field name</th>
+							<th>Value</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr> <td><span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span> IP</td> <td>{{ .IP }}</td> </tr>
+						<tr> <td><span class="glyphicon glyphicon-globe" aria-hidden="true"></span> Country Code</td> <td>{{ .CountryCode }}</td> </tr>
+						<tr> <td><span class="glyphicon glyphicon-flag" aria-hidden="true"></span> Country Name</td> <td>{{ .CountryCode }}</td> </tr>
+						<tr> <td><span class="glyphicon glyphicon-phone" aria-hidden="true"></span> User Agent</td> <td>{{ .UserAgent }}</td> </tr>
+						<tr> <td><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Accept</td> <td>{{ .Accept }}</td> </tr>
+						<tr> <td><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Accept Language</td> <td>{{ .AcceptLanguage }}</td> </tr>
+						<tr> <td><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Accept Encoding</td> <td>{{ .AcceptEncoding }}</td> </tr>
+						<tr> <td><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Via</td> <td>libero</td>{{ .Via }}</tr>
+						<tr> <td><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> XForwarded For</td> <td>{{ .XForwardedFor }}</td> </tr>
+						<tr> <td><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> XForwarded Port</td> <td>{{ .XForwardedPort }}</td> </tr>
+						<tr> <td><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> XForwarded Proto</td> <td>{{ .XForwardedProto }}</td> </tr>
+						<tr> <td><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Request URI</td> <td>{{ .RequestURI }}</td> </tr>
+					</tbody>
+				</table>
+			</div>
+
+			<hr>
+			<h2><span class="glyphicon glyphicon-console" aria-hidden="true"></span> Command Line Interface</h3>
+			<p>How can I get my external IP address in bash?</p>
+			<div class="table-responsive">
+				<table class="table table-striped">
+					<thead>
+						<tr>
+							<th style="width: 30%">Command</th>
+							<th style="width: 3%"></th>
+							<th>Response</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr> <td>$ curl inet-ip.info</td><td><span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></td><td>{{ .IP }}\n</td></tr>
+						<tr> <td>$ curl inet-ip.info/ip</td><td><span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></td><td>{{ .IP }}</td></tr>
+						<tr> <td>$ curl inet-ip.info/json</td><td><span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></td><td>{{ .Json }}</td></tr>
+						<tr> <td>$ curl inet-ip.info/json/indent</td><td><span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></td><td>{{ .JsonIndent }}</td></tr>
+						<tr> <td>$ curl inet-ip.info/yaml</td><td><span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></td><td>{{ .Yaml }}</td></tr>
+						<tr> <td>$ curl inet-ip.info/toml</td><td><span class="glyphicon glyphicon-arrow-right" aria-hidden="true"></td><td>{{ .Toml }}</td></tr>
+					</tbody>
+				</table>
+			</div>
+
+		</div> <!-- /container -->
+		
+			<div id="footer">
+				<div class="container">
+					<p class="muted credit"><a href="https://github.com/masahide/inet-ip.info">Fork me on GitHub.</a></p>
+				</div>
+			</div>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	</body>
+</html>
+
+
+
+

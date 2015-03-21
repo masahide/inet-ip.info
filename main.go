@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	"github.com/masahide/go-libGeoIP"
@@ -28,7 +30,16 @@ type HostInfo struct {
 	RequestURI      string
 }
 
+type TemplateParams struct {
+	HostInfo
+	Json       string
+	JsonIndent string
+	Yaml       string
+	Toml       string
+}
+
 var geoIp *libgeo.GeoIP
+var tpl *template.Template
 
 func init() {
 	var err error
@@ -36,6 +47,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	tpl = template.Must(template.New("index").Parse(string(MustAsset("data/index.html"))))
 }
 
 //go:generate go-bindata data/
@@ -52,6 +64,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func checkUa(ua string) bool {
+	lua := strings.ToLower(ua)
+	if strings.Contains(lua, "curl") {
+		return true
+	}
+	return strings.Contains(lua, "wget")
 }
 
 func getIp(req *http.Request) string {
@@ -84,44 +104,68 @@ func getInfo(req *http.Request) HostInfo {
 	return info
 }
 
-func root(res http.ResponseWriter, req *http.Request) {
-	fmt.Fprintln(res, getIp(req))
-}
-func ip(res http.ResponseWriter, req *http.Request) {
-	res.Write([]byte(getIp(req)))
-}
-
-func jsonPrint(res http.ResponseWriter, req *http.Request) {
+func getJson(req *http.Request) string {
 	j, err := json.Marshal(getInfo(req))
 	if err != nil {
 		log.Println(err)
-		return
+		return ""
 	}
-	res.Write(j)
+	return string(j)
 }
-
-func jsonIndentPrint(res http.ResponseWriter, req *http.Request) {
+func getJsonIndent(req *http.Request) string {
 	j, err := json.MarshalIndent(getInfo(req), "", " ")
 	if err != nil {
 		log.Println(err)
-		return
+		return ""
 	}
-	fmt.Fprintln(res, string(j))
+	return string(j)
 }
 
-func yamlPrint(res http.ResponseWriter, req *http.Request) {
+func getYaml(req *http.Request) string {
 	y, err := yaml.Marshal(getInfo(req))
 	if err != nil {
 		log.Println(err)
-		return
+		return ""
 	}
-	fmt.Fprintln(res, string(y))
+	return string(y)
 }
-func tomlPrint(res http.ResponseWriter, req *http.Request) {
+func getToml(req *http.Request) string {
 	buf := new(bytes.Buffer)
 	if err := toml.NewEncoder(buf).Encode(getInfo(req)); err != nil {
 		log.Println(err)
+		return ""
+	}
+	return buf.String()
+}
+
+func jsonPrint(res http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(res, getJson(req))
+}
+func jsonIndentPrint(res http.ResponseWriter, req *http.Request) {
+	fmt.Fprintln(res, getJsonIndent(req))
+}
+func yamlPrint(res http.ResponseWriter, req *http.Request) {
+	fmt.Fprintln(res, getYaml(req))
+}
+func tomlPrint(res http.ResponseWriter, req *http.Request) {
+	fmt.Fprintln(res, getToml(req))
+}
+
+func root(res http.ResponseWriter, req *http.Request) {
+	ua, _ := req.Header["UserAgent"]
+	if checkUa(fmt.Sprintln(ua)) {
+		fmt.Fprintln(res, getIp(req))
 		return
 	}
-	fmt.Fprintln(res, buf.String())
+	p := TemplateParams{
+		HostInfo:   getInfo(req),
+		Json:       getJson(req),
+		JsonIndent: getJsonIndent(req),
+		Yaml:       getYaml(req),
+		Toml:       getToml(req),
+	}
+	tpl.Execute(res, p)
+}
+func ip(res http.ResponseWriter, req *http.Request) {
+	res.Write([]byte(getIp(req)))
 }
