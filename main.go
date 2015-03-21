@@ -18,5 +18,5 @@ func main() {
 
 func hello(res http.ResponseWriter, req *http.Request) {
 	j, _ := json.MarshalIndent(req, "", " ")
-	fmt.Fprintln(res, j)
+	fmt.Fprintln(res, string(j))
 }
