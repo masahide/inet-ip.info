@@ -8,7 +8,8 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", hello)
+	http.HandleFunc("/", ip)
+	http.HandleFunc("/json", jsonPrint)
 	fmt.Println("listening...")
 	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 	if err != nil {
@@ -16,7 +17,11 @@ func main() {
 	}
 }
 
-func hello(res http.ResponseWriter, req *http.Request) {
+func ip(res http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(res, "%s", req.Header["X-Forwarded-For"])
+}
+
+func jsonPrint(res http.ResponseWriter, req *http.Request) {
 	j, _ := json.MarshalIndent(req, "", " ")
 	fmt.Fprintln(res, string(j))
 }
