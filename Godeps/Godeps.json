@@ -1,5 +1,10 @@
 {
 	"ImportPath": "github.com/masahide/inet-ip.info",
 	"GoVersion": "go1.4.1",
-	"Deps": []
+	"Deps": [
+		{
+			"ImportPath": "github.com/masahide/go-libGeoIP",
+			"Rev": "8ee2ba810972d7ca3a087a2e1709f6d3fe557ffb"
+		}
+	]
 }
