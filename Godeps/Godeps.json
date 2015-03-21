@@ -1,0 +1,5 @@
+{
+	"ImportPath": "github.com/masahide/inet-ip.info",
+	"GoVersion": "go1.4.1",
+	"Deps": []
+}
