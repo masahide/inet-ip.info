@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -17,6 +18,7 @@ import (
 
 type HostInfo struct {
 	IP              string
+	Hostname        string
 	CountryCode     string
 	CountryName     string
 	Accept          []string
@@ -79,8 +81,10 @@ func getIp(req *http.Request) string {
 func getInfo(req *http.Request) HostInfo {
 	ip := getIp(req)
 	loc := geoIp.GetLocationByIP(ip)
+	hostname, _ := net.LookupAddr(ip)
 	info := HostInfo{
 		IP:          ip,
+		Hostname:    fmt.Sprintf("%s", hostname),
 		CountryCode: loc.CountryCode,
 		CountryName: loc.CountryName,
 	}
@@ -137,19 +141,24 @@ func getToml(req *http.Request) []byte {
 
 func jsonPrint(res http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(res, getJson(req))
+	go PageView(req)
 }
 func jsonIndentPrint(res http.ResponseWriter, req *http.Request) {
 	res.Write(getJsonIndent(req))
+	go PageView(req)
 }
 func yamlPrint(res http.ResponseWriter, req *http.Request) {
 	res.Write(getYaml(req))
+	go PageView(req)
 }
 func tomlPrint(res http.ResponseWriter, req *http.Request) {
 	res.Write(getToml(req))
+	go PageView(req)
 }
 
 func root(res http.ResponseWriter, req *http.Request) {
 	ua, _ := req.Header["User-Agent"]
+	defer func() { go PageView(req) }()
 	if checkUa(fmt.Sprintln(ua)) {
 		fmt.Fprintln(res, getIp(req))
 		return
@@ -162,4 +171,5 @@ func root(res http.ResponseWriter, req *http.Request) {
 }
 func ip(res http.ResponseWriter, req *http.Request) {
 	res.Write([]byte(getIp(req)))
+	go PageView(req)
 }
