@@ -44,3 +44,11 @@ jobs:
       - store_test_results:
           path: /tmp/release-results
 
+workflows:
+  version: 2
+  btd:
+    jobs:
+      - test
+      - release:
+        requires:
+          - test
