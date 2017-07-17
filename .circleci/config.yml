@@ -50,5 +50,5 @@ workflows:
     jobs:
       - test
       - release:
-        requires:
-          - test
+          requires:
+            - test
