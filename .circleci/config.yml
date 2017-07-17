@@ -42,7 +42,7 @@ jobs:
       - run: ghr -t "${GITHUB_TOKEN}" -u "${CIRCLE_PROJECT_USERNAME}" -r "${CIRCLE_PROJECT_REPONAME}" --replace `git describe --tags` dist/ 
       - store_artifacts:
           path: dist
-          destination: raw_arc
+          destination: tar.gz
       - store_test_results:
           path: dist
 
