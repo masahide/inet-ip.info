@@ -27,8 +27,15 @@ jobs:
     docker:
       - image: circleci/golang:1.8
     working_directory: /go/src/github.com/masahide/inet-ip.info
+    environment:
+      TEST_RESULTS: /tmp/release-results
     steps:
       - checkout
+      - run: go get -v -t -d ./... | tee ${TEST_RESULTS}/go-test.out
+      - run: go test -v ./... | tee -a ${TEST_RESULTS}/go-test.out
+      - run: go get -v -t -d ./... | tee ${TEST_RESULTS}/go-test.out
+      - run: go test -v ./... | tee -a ${TEST_RESULTS}/go-test.out
+      - run: test -z "$(gofmt -s -l main.go | tee -a ${TEST_RESULTS}/go-test.out)"
       - run: go get github.com/mitchellh/gox
       - run: go get github.com/tcnksm/ghr
       - run: gox --osarch "linux/386 linux/amd64 darwin/386 darwin/amd64" -ldflags "-X main.Version=$(git describe --always --dirty) -X main.Date=${BUILD_DATE}" -output "dist/{{.OS}}_{{.Arch}}/${CIRCLE_PROJECT_REPONAME}"
@@ -42,15 +49,10 @@ jobs:
 
 workflows:
   version: 2
-  test:
-    jobs:
-      - test:
   build_and_test:
     jobs:
       - test:
       - release:
-          requires:
-            - test
           filters:
             branches:
               only: /v.*/
