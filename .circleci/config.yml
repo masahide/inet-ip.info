@@ -1,26 +1,50 @@
 # Golang CircleCI 2.0 configuration file
+# vim:set ts=2 sts=2 sw=2:
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
   build:
-    working_directory: /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
     docker:
       - image: circleci/golang:1.8
+    working_directory: /go/src/github.com/masahide/inet-ip.info
+    environment:
+      TEST_RESULTS: /tmp/test-results
     steps:
       - checkout
-      - run: cp ga_id.go.example ga_id.go
-      - run: go get github.com/axw/gocov/gocov
-      - run: go get github.com/mattn/goveralls
+      - run: mkdir -p $TEST_RESULTS
   test:
     docker:
       - image: circleci/golang:1.8
+    working_directory: /go/src/github.com/masahide/inet-ip.info
     steps:
       - checkout
+      - run: cp ga_id.go.example ga_id.go
       - run: git tag -l 
-      - run: go get -v -t -d ./...
-      - run: go test -v ./...
-      - run: test -z "$(gofmt -s -l . | tee /dev/stderr)"
+      - run: go get -v -t -d ./... | tee ${TEST_RESULTS}/go-test.out
+      - run: go test -v ./... | tee -a ${TEST_RESULTS}/go-test.out
+      - run: test -z "$(gofmt -s -l main.go | tee -a ${TEST_RESULTS}/go-test.out)"
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+      - store_test_results:
+          path: /tmp/test-results
+  release:
+    docker:
+      - image: circleci/golang:1.8
+    working_directory: /go/src/github.com/masahide/inet-ip.info
+    steps:
+      - checkout
+      - run: go get github.com/mitchellh/gox
+      - run: go get github.com/tcnksm/ghr
+      - run: gox --osarch "linux/386 linux/amd64 darwin/386 darwin/amd64" -ldflags "-X main.Version=$(git describe --always --dirty) -X main.Date=${BUILD_DATE}" -output "dist/{{.OS}}_{{.Arch}}/${CIRCLE_PROJECT_REPONAME}"
+      - run: cd dist;for i in $(ls);do tar -cvzf "${CIRCLE_PROJECT_REPONAME}_${i}.tar.gz" "${i}";rm -rf "${i}";done
+      - run: ghr -t "${GITHUB_TOKEN}" -u "${CIRCLE_PROJECT_USERNAME}" -r "${CIRCLE_PROJECT_REPONAME}" --replace `git describe --tags` dist/ 
+      - store_artifacts:
+          path: dist
+          destination: raw_arc
+      - store_test_results:
+          path: dist
 
 workflows:
   version: 2
@@ -28,22 +52,11 @@ workflows:
     jobs:
       - build
       - test:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
-
-#    docker:
-      # specify the version
-      #- image: circleci/golang:1.8
-      
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
-    #### TEMPLATE_NOTE: go expects specific checkout path representing url
-    #### expecting it in the form of
-    ####   /go/src/github.com/circleci/go-tool
-    ####   /go/src/bitbucket.org/circleci/go-tool
+        requires:
+          - build
+      - release:
+        requires:
+          - test
+        filters:
+          branches:
+            only: /v.*/
