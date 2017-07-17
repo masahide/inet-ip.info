@@ -4,9 +4,40 @@
 version: 2
 jobs:
   build:
+    working_directory: /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
     docker:
-      # specify the version
       - image: circleci/golang:1.8
+    working_directory: /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+    steps:
+      - checkout
+      - run: cp ga_id.go.example ga_id.go
+      - run: go get github.com/axw/gocov/gocov
+      - run: go get github.com/mattn/goveralls
+  test:
+    docker:
+      - image: circleci/golang:1.8
+    step:
+      - checkout
+      - run: git tag -l 
+      - run: go get -v -t -d ./...
+      - run: go test -v ./...
+      - run: test -z "$(gofmt -s -l . | tee /dev/stderr)"
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+
+#    docker:
+      # specify the version
+      #- image: circleci/golang:1.8
       
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -17,12 +48,3 @@ jobs:
     #### expecting it in the form of
     ####   /go/src/github.com/circleci/go-tool
     ####   /go/src/bitbucket.org/circleci/go-tool
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
-    steps:
-      - checkout
-
-      # specify any bash command here prefixed with `run: `
-      - run: cp ga_id.go.example ga_id.go
-      - run: go get -v -t -d ./...
-      - run: go test -v ./...
-
