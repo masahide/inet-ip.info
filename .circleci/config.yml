@@ -7,7 +7,6 @@ jobs:
     working_directory: /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
     docker:
       - image: circleci/golang:1.8
-    working_directory: /go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
     steps:
       - checkout
       - run: cp ga_id.go.example ga_id.go
@@ -16,7 +15,7 @@ jobs:
   test:
     docker:
       - image: circleci/golang:1.8
-    step:
+    steps:
       - checkout
       - run: git tag -l 
       - run: go get -v -t -d ./...
