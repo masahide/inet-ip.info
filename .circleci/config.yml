@@ -30,6 +30,8 @@ jobs:
       - store_test_results:
           path: /tmp/test-results
   release:
+    branches:
+      only: /v.*/
     docker:
       - image: circleci/golang:1.8
     working_directory: /go/src/github.com/masahide/inet-ip.info
@@ -46,17 +48,3 @@ jobs:
       - store_test_results:
           path: dist
 
-workflows:
-  version: 2
-  build_and_test:
-    jobs:
-      - build
-      - test:
-        requires:
-          - build
-      - release:
-        requires:
-          - test
-        filters:
-          branches:
-            only: /v.*/
