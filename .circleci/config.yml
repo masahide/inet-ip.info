@@ -4,7 +4,7 @@
 # Check https://circleci.com/docs/2.0/language-go/ for more details
 version: 2
 jobs:
-  build:
+  test:
     docker:
       - image: circleci/golang:1.8
     working_directory: /go/src/github.com/masahide/inet-ip.info
@@ -12,15 +12,9 @@ jobs:
       TEST_RESULTS: /tmp/test-results
     steps:
       - checkout
-      - run: mkdir -p $TEST_RESULTS
-  test:
-    docker:
-      - image: circleci/golang:1.8
-    working_directory: /go/src/github.com/masahide/inet-ip.info
-    steps:
-      - checkout
       - run: cp ga_id.go.example ga_id.go
       - run: git tag -l 
+      - run: mkdir -p $TEST_RESULTS
       - run: go get -v -t -d ./... | tee ${TEST_RESULTS}/go-test.out
       - run: go test -v ./... | tee -a ${TEST_RESULTS}/go-test.out
       - run: test -z "$(gofmt -s -l main.go | tee -a ${TEST_RESULTS}/go-test.out)"
@@ -30,8 +24,6 @@ jobs:
       - store_test_results:
           path: /tmp/test-results
   release:
-    branches:
-      only: /v.*/
     docker:
       - image: circleci/golang:1.8
     working_directory: /go/src/github.com/masahide/inet-ip.info
@@ -52,10 +44,10 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - build
       - test:
-          requires:
-            - build
       - release:
           requires:
             - test
+          filters:
+            branches:
+              only: /v.*/
