@@ -1,0 +1,43 @@
+# circle.yml
+# vim:set ts=2 sts=2 sw=2:
+machine:
+  environment:
+    CHECKOUT_PATH: "${HOME}/${CIRCLE_PROJECT_REPONAME}"
+    GOROOT: ""
+    #GOPATH: "${HOME}/.go_workspace:/usr/local/go_workspace:${HOME}/.go_project"
+    GOPATH: "${HOME}/.go_project"
+    PATH: "/usr/local/go/bin:/usr/local/go_workspace/bin:~/.go_workspace/bin:${PATH}:${GOPATH}/bin"
+  post:
+    - echo "export BUILD_DATE=\"`date +%FT%T%z`\"" >> ~/.circlerc
+    - cat ~/.circlerc|sed 's/.*GITHUB_TOKEN.*//g'|sed 's/.*COVERALLS_TOKEN.*//g'|sed 's/.*GA_TID.*//g'|sed 's/.*GA_NAMESPACE.*//g'
+dependencies:
+  pre:
+    - mkdir -p ${GOPATH}/src/github.com/${CIRCLE_PROJECT_USERNAME}
+    - ln -s ${HOME}/${CIRCLE_PROJECT_REPONAME} ${GOPATH}/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+    - git tag -l 
+    - go get github.com/golang/dep/cmd/dep
+    - cd ${GOPATH}/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} && dep ensure && dep status
+    - cp ga_id.go.example ga_id.go
+    #- go get github.com/axw/gocov/gocov
+    #- go get github.com/mattn/goveralls
+    #- go get -u github.com/alecthomas/gometalinter
+    #- gometalinter --install
+test:
+  override:
+    - go test $(go list ./... | grep -v /vendor/) 
+    - test -z "$(gofmt -s -l main.go | tee /dev/stderr)"
+    #- gometalinter --deadline 30s ./...
+    #- go test -race -test.v ./...
+    #- go test -race -v -covermode=count -coverprofile=coverage.out
+    #- goveralls -v -coverprofile=coverage.out -service circle-ci -repotoken "${COVERALLS_TOKEN}" 
+deployment:
+  release:
+     tag: /v.*/
+     commands:
+     - sed -i -e "s/UA-000000-00/${GA_TID}/" ga_id.go
+     - sed -i -e "s/00000000-0000-0000-00000000000000000/${GA_NAMESPACE}/" ga_id.go
+     - go get github.com/mitchellh/gox
+     - go get github.com/tcnksm/ghr
+     - gox --osarch "linux/386 linux/amd64 darwin/386 darwin/amd64" -ldflags "-X main.Version=$(git describe --always --dirty) -X main.Date=${BUILD_DATE}" -output "dist/{{.OS}}_{{.Arch}}/${CIRCLE_PROJECT_REPONAME}"
+     - cd dist;for i in $(ls);do tar -cvzf "${CIRCLE_PROJECT_REPONAME}_${i}.tar.gz" "${i}";rm -rf "${i}";done
+     - ghr -t "${GITHUB_TOKEN}" -u "${CIRCLE_PROJECT_USERNAME}" -r "${CIRCLE_PROJECT_REPONAME}" --replace `git describe --tags` dist/ 

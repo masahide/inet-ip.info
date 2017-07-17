@@ -23,3 +23,5 @@ _testmain.go
 *.test
 *.prof
 ga_id.go
+vendor
+inet-ip.info
