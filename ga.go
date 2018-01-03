@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
@@ -106,7 +108,12 @@ func PageView(req *http.Request) error {
 	//vals.Add("el", "json")
 	//vals.Add("ev", "200")
 	//log.Printf("vals:%# v", vals)
-	_, err := http.PostForm(endpoint, vals)
-	return err
+	res, err := http.PostForm(endpoint, vals)
+	if err != nil {
+		return err
+	}
+	io.Copy(ioutil.Discard, res.Body)
+	res.Body.Close()
+	return nil
 
 }
