@@ -75,7 +75,10 @@ func checkUa(ua string) bool {
 
 func getIp(req *http.Request) string {
 	ips := req.Header["X-Forwarded-For"]
-	return ips[len(ips)-1]
+	if len(ips) > 0 {
+		return ips[len(ips)-1]
+	}
+	return ""
 }
 
 func getInfo(req *http.Request) HostInfo {
