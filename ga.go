@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 
@@ -106,7 +105,7 @@ func PageView(req *http.Request) error {
 	//vals.Add("ea", "get")
 	//vals.Add("el", "json")
 	//vals.Add("ev", "200")
-	log.Printf("vals:%# v", vals)
+	//log.Printf("vals:%# v", vals)
 	_, err := http.PostForm(endpoint, vals)
 	return err
 
