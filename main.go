@@ -59,7 +59,7 @@ func main() {
 	http.HandleFunc("/yaml", yamlPrint)
 	http.HandleFunc("/toml", tomlPrint)
 	fmt.Println("listening...")
-	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
+	err := http.ListenAndServe(os.Getenv("HOST")+":"+os.Getenv("PORT"), nil)
 	if err != nil {
 		panic(err)
 	}
