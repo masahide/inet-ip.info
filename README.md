@@ -1,5 +1,9 @@
 # inet-ip.info
 
+
+The code for this site has been renewed and moved to https://github.com/inet-ip-info/website
+
+
 ## make
 
 ```
